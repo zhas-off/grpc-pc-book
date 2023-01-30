@@ -1,5 +1,0 @@
-package grpcpcbook
-
-func main() {
-
-}
