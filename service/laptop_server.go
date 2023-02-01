@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/zhas-off/grpc-pc-book/pb"
@@ -43,7 +42,7 @@ func (server *LaptopServer) CreateLaptop(
 		laptop.Id = id.String()
 	}
 
-	time.Sleep(6 * time.Second)
+	// time.Sleep(6 * time.Second)
 
 	if ctx.Err() == context.Canceled {
 		log.Print("request is canceled")
@@ -71,4 +70,33 @@ func (server *LaptopServer) CreateLaptop(
 		Id: laptop.Id,
 	}
 	return res, nil
+}
+
+func (server *LaptopServer) SearchLaptop(
+	req *pb.SearchLaptopRequest,
+	stream pb.LaptopService_SearchLaptopServer,
+) (outErr error) {
+	filter := req.GetFilter()
+	log.Printf("received a search-laptop request with filter: %v", filter)
+
+	err := server.Store.Search(
+		stream.Context(),
+		filter,
+		func(laptop *pb.Laptop) {
+			res := &pb.SearchLaptopResponse{Laptop: laptop}
+			err := stream.Send(res)
+			if err != nil {
+				outErr = status.Errorf(codes.Unknown, "cannot send response: %v", err)
+				return
+			}
+
+			log.Printf("sent laptop with id: %s", laptop.GetId())
+		},
+	)
+
+	if err != nil {
+		return status.Errorf(codes.Internal, "unexpected error: %v", err)
+	}
+
+	return nil
 }

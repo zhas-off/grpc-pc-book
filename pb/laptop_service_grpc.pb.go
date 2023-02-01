@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LaptopServiceClient interface {
 	CreateLaptop(ctx context.Context, in *CreateLaptopRequest, opts ...grpc.CallOption) (*CreateLaptopResponse, error)
+	SearchLaptop(ctx context.Context, in *SearchLaptopRequest, opts ...grpc.CallOption) (LaptopService_SearchLaptopClient, error)
 }
 
 type laptopServiceClient struct {
@@ -42,11 +43,44 @@ func (c *laptopServiceClient) CreateLaptop(ctx context.Context, in *CreateLaptop
 	return out, nil
 }
 
+func (c *laptopServiceClient) SearchLaptop(ctx context.Context, in *SearchLaptopRequest, opts ...grpc.CallOption) (LaptopService_SearchLaptopClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LaptopService_ServiceDesc.Streams[0], "/grpcpcbook.LaptopService/SearchLaptop", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &laptopServiceSearchLaptopClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LaptopService_SearchLaptopClient interface {
+	Recv() (*SearchLaptopResponse, error)
+	grpc.ClientStream
+}
+
+type laptopServiceSearchLaptopClient struct {
+	grpc.ClientStream
+}
+
+func (x *laptopServiceSearchLaptopClient) Recv() (*SearchLaptopResponse, error) {
+	m := new(SearchLaptopResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LaptopServiceServer is the server API for LaptopService service.
 // All implementations must embed UnimplementedLaptopServiceServer
 // for forward compatibility
 type LaptopServiceServer interface {
 	CreateLaptop(context.Context, *CreateLaptopRequest) (*CreateLaptopResponse, error)
+	SearchLaptop(*SearchLaptopRequest, LaptopService_SearchLaptopServer) error
 	mustEmbedUnimplementedLaptopServiceServer()
 }
 
@@ -56,6 +90,9 @@ type UnimplementedLaptopServiceServer struct {
 
 func (UnimplementedLaptopServiceServer) CreateLaptop(context.Context, *CreateLaptopRequest) (*CreateLaptopResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateLaptop not implemented")
+}
+func (UnimplementedLaptopServiceServer) SearchLaptop(*SearchLaptopRequest, LaptopService_SearchLaptopServer) error {
+	return status.Errorf(codes.Unimplemented, "method SearchLaptop not implemented")
 }
 func (UnimplementedLaptopServiceServer) mustEmbedUnimplementedLaptopServiceServer() {}
 
@@ -88,6 +125,27 @@ func _LaptopService_CreateLaptop_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LaptopService_SearchLaptop_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchLaptopRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LaptopServiceServer).SearchLaptop(m, &laptopServiceSearchLaptopServer{stream})
+}
+
+type LaptopService_SearchLaptopServer interface {
+	Send(*SearchLaptopResponse) error
+	grpc.ServerStream
+}
+
+type laptopServiceSearchLaptopServer struct {
+	grpc.ServerStream
+}
+
+func (x *laptopServiceSearchLaptopServer) Send(m *SearchLaptopResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // LaptopService_ServiceDesc is the grpc.ServiceDesc for LaptopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -100,6 +158,12 @@ var LaptopService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LaptopService_CreateLaptop_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SearchLaptop",
+			Handler:       _LaptopService_SearchLaptop_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "laptop_service.proto",
 }

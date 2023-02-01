@@ -14,7 +14,7 @@ import (
 func main() {
 	port := flag.Int("port", 0, "the server port")
 	flag.Parse()
-	log.Printf("start server on port: %d", *port)
+	log.Printf("starting server on port: %d", *port)
 
 	laptopServer := service.NewLaptopServer(service.NewInMemoryLaptopStore())
 	grpcServer := grpc.NewServer()
