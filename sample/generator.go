@@ -1,8 +1,8 @@
 package sample
 
 import (
-	"github.com/golang/protobuf/ptypes"
 	"github.com/zhas-off/grpc-pc-book/pb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // NewKeyboard returns a new sample keyboard
@@ -129,8 +129,12 @@ func NewLaptop() *pb.Laptop {
 		},
 		PriceUsd:    randomFloat64(1500, 3500),
 		ReleaseYear: uint32(randomInt(2015, 2019)),
-		UpdatedAt:   ptypes.TimestampNow(),
+		UpdatedAt:   timestamppb.Now(),
 	}
 
 	return laptop
+}
+
+func RandomLaptopScore() float64 {
+	return float64(randomInt(1, 5))
 }
