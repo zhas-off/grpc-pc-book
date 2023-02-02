@@ -60,6 +60,7 @@ func (store *DiskImageStore) Save(
 		return "", fmt.Errorf("cannot write image to file: %w", err)
 	}
 
+	file.Close()
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 

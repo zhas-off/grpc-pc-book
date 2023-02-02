@@ -22,7 +22,9 @@ func main() {
 	ratingStore := service.NewInMemoryRatingStore()
 	laptopServer := service.NewLaptopServer(laptopStore, imageStore, ratingStore)
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+	// grpc.UnaryInterceptor()
+	)
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
 	reflection.Register(grpcServer)
 
