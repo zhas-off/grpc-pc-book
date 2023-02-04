@@ -21,7 +21,7 @@ openssl x509 -in server-cert.pem -noout -text
 openssl req -newkey rsa:4096 -nodes -keyout client-key.pem -out client-req.pem \
 -subj "/C=KZ/ST=Almaty/L=Almaty/O=PC Client/OU=Computer/CN=*.pcclient.com/emailAddress=pcclient@gmail.com"
 
-# 3. Use CA's private key to sign client's CSR and get back the signed certificate
+# 5. Use CA's private key to sign client's CSR and get back the signed certificate
 openssl x509 -req -in client-req.pem -days 60 -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out client-cert.pem -extfile client-ext.cnf
 
 echo "Client's signed certificate"
